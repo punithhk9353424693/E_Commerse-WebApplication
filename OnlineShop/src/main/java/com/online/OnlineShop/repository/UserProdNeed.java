@@ -126,5 +126,10 @@ public class UserProdNeed {
 		return "Password was Updated";
 
 	}
+	public List<User> findAll(){
+		Query query=em.createQuery("select s from User s");
+		 List<User> list=query.getResultList();
+		 return list;
+	}
 
 }

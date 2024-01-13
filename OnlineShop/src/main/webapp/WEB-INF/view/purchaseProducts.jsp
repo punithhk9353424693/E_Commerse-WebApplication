@@ -26,7 +26,7 @@
 			</th>
 			<th><p>Email: ${user.getEmail()}</p></th>
 			<th><p>Password: ${user.getPassword()}</p></th>
-			<div style="margin-top: -220px;height: 200px">
+			<div style="margin-top: -240px;height: 200px">
 				<a href="${pageContext.request.contextPath}/product/viewOrders?id=${user.getId()}"
 					style="padding-left: 1100px; color: black;"><button
 						style="width: 180px; height: 30px; border-radius: 10px;margin-top:20px; background-color: purple; color: white; font-size: large; font-family: sans-serif;">viewOrders!!</button></a>
@@ -36,6 +36,7 @@
 				<a href="${pageContext.request.contextPath}/product/deleteUser?id=${user.getId()}"
 					style="padding-left: 1100px;color: black;"><button
 						style="width: 180px; height: 30px; border-radius: 10px;margin-top:30px; background-color: purple; color: white; font-size: large; font-family: sans-serif;">DeleteAccount?</button></a>
+<br>
 
 
 			</div>
@@ -50,7 +51,9 @@
 		<marquee behavior="alternate"
 			style="font-size: large; font-family: cursive; text-decoration: underline; color: white">Purchase
 			Your Products Here!!!!! </marquee>
-	</div>
+	</div><%-- <p style="padding-left: 1000px;font-size:larger; ">To View How Many Users Are using Shoping Cart:</p> <a href="${pageContext.request.contextPath}/product/findAllUsers?id=${user.getId()}"
+					style="padding-left: 1270px;">Click here</a> --%>
+	
 	<table border="7px"
 		style="margin-left: 60px; margin-top: 5px; width: 1380px; box-shadow: 0px 0px 70px;">
 		<tr style="background-color: olive;color: white">
@@ -66,13 +69,13 @@
 		<c:forEach var="product" items="${products}">
 
 			<tr style="background-color:  white;color: black;">
-				<td >${product.getProductId()}</td>
-				<td >${product.getProductName()}</td>
-				<td >${product.getDescription()}</td>
-				<td >${product.getCost()}</td>
+				<td style="padding-left: 8px">${product.getProductId()}</td>
+				<td style="padding-left: 8px">${product.getProductName()}</td>
+				<td style="padding-left: 8px">${product.getDescription()}</td>
+				<td style="padding-left: 8px">${product.getCost()}</td>
 				<td ><a
 					style="text-decoration: none; text-align: center; padding-left: 10px;"
-					href="${pageContext.request.contextPath}/product/justproduct/${product.getProductId()}/${user.getId()}">purchase</a></td>
+					href="${pageContext.request.contextPath}/product/redirectTopay/${product.getProductId()}/${user.getId()}">purchase</a></td>
 				<td ><a
 					style="text-decoration: none; text-align: center; padding-left: 10px;"
 					href="${pageContext.request.contextPath}/product/viewProduct/${product.getProductId()}/${user.getId()}">ViewProduct</a></td>

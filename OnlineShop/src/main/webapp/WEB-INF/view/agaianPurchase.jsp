@@ -80,7 +80,7 @@
 				Back</button></a>
 				
 				 <a
-			href="${pageContext.request.contextPath}/product/purchaseIt?productId=${product.getProductId()}&id=${user.getId()}"
+			href="${pageContext.request.contextPath}/product/purchaseIt/${product.getProductId()}/${user.getId()}"
 			style="margin-left: 0px"><button
 				style="width: 190px; height: 40px; border-radius: 6px; background-color: white; color: black; padding-left: 170">
 				PurchaseAgain</button></a>

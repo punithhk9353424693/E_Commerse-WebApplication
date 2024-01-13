@@ -1,8 +1,15 @@
 package com.online.OnlineShop.controller;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -13,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.online.OnlineShop.entity.Payment;
 import com.online.OnlineShop.entity.Product;
 import com.online.OnlineShop.entity.User;
 import com.online.OnlineShop.servise.ProductServise;
@@ -108,31 +116,19 @@ public class ProductControllee {
 			if (user != null && product != null) {
 				List<Product> userProducts = user.getProducts();
 
-				// Check if the user has products and if the product is already in the user's
-				// cart
-				// if (userProducts == null || !isProductAlreadyInCart(userProducts, productId))
-				// {
 				if (userProducts == null) {
 					userProducts = new ArrayList<Product>();
 				}
 
-				if (!isProductAlreadyInCart(userProducts, productId)) {
 					product.setUser(user);
 					Product savedProduct = ser.persisteProduct(product);
 					userProducts.add(savedProduct);
 					serv.save(user);
-					mav.addObject("order", "OrderConfirmed");
-					mav.addObject("products", userProducts);
-					mav.setViewName("finalpurchase");
+					mav.addObject("user", user);
+					mav.addObject("product", product);
+					mav.setViewName("paymentValidation");
 					return mav;
 				} else {
-					mav.addObject("view",
-							"You already have this product in your cart!!" + "do You Want to Buy This product again");
-					mav.addObject("product", product);
-					mav.setViewName("agaianPurchase");
-					return mav;
-				}
-			} else {
 				mav.addObject("error", "Invalid user or product");
 				mav.setViewName("error");
 				return mav;
@@ -204,10 +200,12 @@ public class ProductControllee {
 	@RequestMapping("/deleteUser")
 	public ModelAndView userDelete(@RequestParam("id") Integer id) {
 		ModelAndView mav = new ModelAndView();
-		try{String s = serv.userDelete(id);
-		mav.addObject("del", s);
-		mav.setViewName("deletedAccount");
-		return mav;}catch(Exception e) {
+		try {
+			String s = serv.userDelete(id);
+			mav.addObject("del", s);
+			mav.setViewName("deletedAccount");
+			return mav;
+		} catch (Exception e) {
 			e.printStackTrace();
 			mav.addObject("error", "You can't Delete your Account at this time!! Try another Some time??");
 			mav.setViewName("error");
@@ -254,16 +252,18 @@ public class ProductControllee {
 
 		// Retrieve the user
 		User user = serv.findById(id);
-
+       Product product=ser.findById(productId);
 		// Remove the association between the user and the product
+		if(user!=null) {
 		Product productToRemove = ser.findById(productId);
 		if (productToRemove != null) {
 			user.getProducts().remove(productToRemove);
+			user.setTotalAmmount(user.getTotalAmmount()+product.getCost());
 			serv.save(user); // Assuming you have a method to save changes to the user
 		}
 		// Retrieve the updated list of purchased products for the user
 		List<Product> purchasedProducts = user.getProducts();
-
+        
 		// ... rest of your code ...
 
 		mav.addObject("user", user);
@@ -272,8 +272,12 @@ public class ProductControllee {
 		mav.addObject("dele", "order was canceled");
 		mav.setViewName("canceledProduct");
 		return mav;
+	}else {
+		mav.addObject("error", "User not found!!!");
+		mav.setViewName("error");
+		return mav;
 	}
-
+	}
 	@RequestMapping("/back/{id}")
 	public ModelAndView viewAccount(@PathVariable("id") Integer id) {
 		ModelAndView mav = new ModelAndView();
@@ -302,52 +306,182 @@ public class ProductControllee {
 	public ModelAndView againPurchase(@RequestParam("id") Integer id) {
 		ModelAndView mav = new ModelAndView();
 		User user2 = serv.findById(id);
+		if(user2!=null) {
 		List<Product> products = ser.findProducts();
 		mav.addObject("user", user2);
 		mav.addObject("products", products);
 		mav.addObject("cal", 0.0);
 		mav.setViewName("purchaseProducts");
-		return mav;
+		return mav;}else {
+			mav.addObject("error", "User not found!!!");
+			mav.setViewName("error");
+			return mav;
+		}
 	}
 
-	@RequestMapping("/purchaseIt")
-	public ModelAndView purchaseAgian(@RequestParam("productId") Integer productId, @RequestParam("id") Integer id) {
+	@RequestMapping("/purchaseIt/{productId}/{id}")
+	public ModelAndView purchaseAgian(@PathVariable("productId") Integer productId, @PathVariable("id") Integer id) {
 		ModelAndView mav = new ModelAndView();
 
 		User user = serv.findById(id);
 		Product product = ser.findById(productId);
 
-		mav.addObject("user", user);
+		try {
+			if (user != null && product != null) {
 
-	try {
+				mav.addObject("product", product);
+				mav.addObject("user", user);
+				mav.setViewName("paymentValidation");
+				return mav;
+			} else {
+				mav.addObject("view", "Invalid Product or User!!");
+				mav.setViewName("error");
+				return mav;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			mav.addObject("error",
+					"Theire is some issues from the technical team!! please try agin later or By refreshin");
+
+			mav.setViewName("error");
+			return mav;
+		}
+	}
+
+	@RequestMapping("/findAllUsers")
+	public ModelAndView findUsers(@RequestParam Integer id) {
+		ModelAndView mav = new ModelAndView();
+		User user2 = serv.findById(id);
+		List<User> users = serv.list();
+		mav.addObject("users", users);
+		mav.addObject("user2", user2);
+		mav.setViewName("AllUsers");
+		return mav;
+
+	}
+
+	@RequestMapping("/redirectTopay/{productId}/{id}")
+	public ModelAndView returnTopay(@PathVariable("productId") Integer productId, @PathVariable("id") Integer id) {
+		ModelAndView mav = new ModelAndView();
+		User user = serv.findById(id);
+		Product product = ser.findById(productId);
+
 		if (user != null && product != null) {
-	
 			List<Product> userProducts = user.getProducts();
 
 			if (userProducts == null) {
 				userProducts = new ArrayList<Product>();
 			}
 
-			product.setUser(user);
-			Product savedProduct = ser.persisteProduct(product);
-			userProducts.add(savedProduct);
-			serv.save(user);
-			mav.addObject("order", "OrderConfirmed");
-			mav.addObject("products", userProducts);
-			mav.setViewName("finalpurchase");
-			return mav;
+			if (!isProductAlreadyInCart(userProducts, productId)) {
+
+				mav.addObject("user", user);
+				mav.addObject("product", product);
+
+			
+				mav.setViewName("paymentValidation");
+				return mav;
+			} else {
+				mav.addObject("view",
+						"You already have this product in your cart!!" + "do You Want to Buy This product again");
+				mav.addObject("product", product);
+				mav.addObject("user", user);
+				mav.setViewName("agaianPurchase");
+				return mav;
+			}
 		} else {
-			mav.addObject("view", "Invalid Product or User!!");
-			mav.setViewName("error");
+			mav.addObject("order", "Theire is some issue while fetching the details!!!!");
+			mav.setViewName("insufficient");
 			return mav;
 		}
-	}catch (Exception e) {
-		e.printStackTrace();
-		mav.addObject("error",
-				"Theire is some issues from the technical team!! please try agin later or By refreshin");
+	}
 
-		mav.setViewName("error");
+	@RequestMapping("/accountLogin")
+	public ModelAndView finalPay(@RequestParam("cost") Double cost, @RequestParam("id") Integer id,
+			@RequestParam("productId") Integer productId, @RequestParam("password") String password,HttpSession session)	
+	{
+		ModelAndView mav = new ModelAndView();
+
+		User user = serv.findById(id);
+		Product product = ser.findById(productId);
+		Double totalAmmount = user.getTotalAmmount();
+		
+		// =======3rd if
+		if (user != null && product != null) {
+			// ======================2nd if
+			if (serv.login(id, password) == true) {
+
+				// -------------------------------------1st if
+				if (product.getCost() <= totalAmmount) {
+					user.setTotalAmmount(user.getTotalAmmount() - product.getCost());
+//=================
+					List<Product> userProducts = user.getProducts();
+
+					if (userProducts == null) {
+						userProducts = new ArrayList<Product>();
+					}
+
+					product.setUser(user);
+					Product savedProduct = ser.persisteProduct(product);
+					userProducts.add(savedProduct);
+					serv.save(user);
+					session.setAttribute("user", user);
+					mav.addObject("user", user);
+					mav.addObject("order", "OrderConfirmed");
+					mav.addObject("products", userProducts);
+					mav.setViewName("finalpurchase");
+					return mav;
+
+				} else {
+         			mav.addObject("order", "Insufficient Balance");
+					mav.setViewName("insufficient");
+					return mav;
+				} // for 2nd if
+					// ---------------------------------1st if
+			} else {
+				mav.addObject("log", "password is incorrect");
+
+				mav.setViewName("logshow");
+				return mav;
+
+			}
+			// =====================2nd if
+		} // for 3rd
+		else {
+			mav.addObject("order", "user or Product doesn't Exist");
+
+			mav.setViewName("insufficient");
+			return mav;
+		}
+	}
+	@RequestMapping("/cehck")
+	public ModelAndView balanceCheck(@RequestParam("id") Integer id) {
+		ModelAndView mav=new ModelAndView();
+		User user=serv.findById(id);
+		mav.addObject("user", user);
+		mav.setViewName("checkBalanace");
 		return mav;
 	}
+	@RequestMapping("/fetchBalance")
+	public ModelAndView balance(@RequestParam("id") Integer id,@RequestParam("password") String password) {
+		ModelAndView mav=new ModelAndView();
+		User user=serv.findById(id);
+		if(user!=null ) {
+			if(serv.login(id, password)==true) {
+		mav.addObject("user", user.getTotalAmmount());
+		mav.addObject("user1", user.getName());
+		mav.setViewName("fetched");
+		return mav;
+			}else {
+				mav.addObject("error", "password is incorrect");
+				mav.setViewName("error");
+				return mav;
+			}
+			
+		}else {
+			mav.addObject("error", "user not found");
+			mav.setViewName("error");
+		return mav;
+		}
 	}
 }

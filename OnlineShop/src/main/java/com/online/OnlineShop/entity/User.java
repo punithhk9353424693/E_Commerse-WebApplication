@@ -21,8 +21,18 @@ public class User {
 	private String name;
 	private String email;
 	private String password;
+	private double totalAmmount=100000.00;
 	@OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
 	private List<Product> products;
+
+	
+	public double getTotalAmmount() {
+		return totalAmmount;
+	}
+
+	public void setTotalAmmount(double totalAmmount) {
+		this.totalAmmount = totalAmmount;
+	}
 
 	public List<Product> getProducts() {
 		return products;

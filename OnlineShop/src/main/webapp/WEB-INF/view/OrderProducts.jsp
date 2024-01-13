@@ -11,7 +11,7 @@
 	<div id="box1"
 		style="width: 1400px; height: 360px;padding-top:20px; box-shadow: 0px 0px 110px; border-radius: 6px; background-color: silver; font-size: x-large; margin-top: 30px; margin-left: 30px;">
 		<div style="padding-left: 40px">
-		<div style="background-color:grey; width: 1400px;height: 340px;padding-bottom: 30px;box-shadow: 0px 0px 20px">
+		<div style="background-color:orange; width: 1400px;height: 340px;padding-bottom: 30px;box-shadow: 0px 0px 20px">
 			<th><h2
 					style="text-decoration: underline; color: yellow; text-transform: uppercase; font-weight: bold;width: 350px;height:50px;padding-top: 30px">User_Account:</h2>
 			</th>
@@ -62,7 +62,7 @@
 				<td style="background-color: white;">${product.getProductColor()}</td>
 				<td style="background-color: white;">${product.getModel()}</td>
 
-				<td style="background-color: white;"><a
+				<td style="background-color: white;"><a onclick="return moneyBack()"
 					style="text-decoration: none; text-align: center; padding-left: 10px"
 					href="canceled/${product.getProductId()}/${user.getId()}">caneclOrder</a></td>
 
@@ -72,6 +72,17 @@
 	</table><a href="calculate?id=${user.getId()} " style="padding-left: 300px"><button
 					style="margin-left: 890px;margin-top:40px; width: 130px; height: 40px; border-radius: 10px; background-color:teal; color: white">generateBill</button></a>
 		<label style="text-decoration: underline;font-weight: bold;font-size: xx-large;padding-left: 10px"><%=request.getAttribute("cal")%></label>
-			
+		
+		
+		
+		
+			 <script>
+        function moneyBack() {
+           
+                alert("Ammount was credited !! you can check your bank balance!!!.");
+                return true;
+            
+        }
+    </script>
 </body>
 </html>

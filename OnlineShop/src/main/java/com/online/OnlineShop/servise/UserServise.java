@@ -1,5 +1,6 @@
 package com.online.OnlineShop.servise;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.transaction.Transactional;
@@ -43,5 +44,8 @@ public class UserServise {
 	public String updateUser(Integer id,String password) {
 		return one.updatePassword(id, password);
 		
+	}
+	public List<User> list(){
+		return one.findAll();
 	}
 }
